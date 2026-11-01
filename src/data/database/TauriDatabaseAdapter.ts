@@ -26,15 +26,10 @@ export class TauriDatabaseAdapter implements IDatabaseAdapter {
   }
 
   async transaction<T>(action: (adapter: IDatabaseAdapter) => Promise<T>): Promise<T> {
-    await this.db.execute('BEGIN TRANSACTION');
-    try {
-      const result = await action(this);
-      await this.db.execute('COMMIT');
-      return result;
-    } catch (error) {
-      await this.db.execute('ROLLBACK');
-      throw error;
-    }
+    // In @tauri-apps/plugin-sql, sqlx manages a connection pool where BEGIN/COMMIT
+    // calls cannot be pinned across separate IPC commands. Executing queries sequentially
+    // guarantees execution on the connection pool.
+    return await action(this);
   }
 
   async close(): Promise<void> {
