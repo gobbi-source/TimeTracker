@@ -44,8 +44,8 @@
     "noProjectsPrompt": "Create a project to start using the Kanban board"
   },
   "kanban": {
-    "addColumn": "New Column",
-    "columnName": "Column Name",
+    "addColumn": "New Type",
+    "columnName": "Type Name",
     "columnDefaultTodo": "To Do",
     "columnDefaultInProgress": "In Progress",
     "columnDefaultDone": "Done",
@@ -61,8 +61,8 @@
     "estimated": "Estimated",
     "startTimer": "Start Timer",
     "stopTimer": "Stop Timer",
-    "noTasks": "No tasks in this column",
-    "confirmDeleteColumn": "Delete this column? All associated tasks will be archived.",
+    "noTasks": "No tasks in this Type",
+    "confirmDeleteColumn": "Delete this Type? All associated tasks will be archived.",
     "confirmDeleteTask": "Delete this task?"
   },
   "timer": {

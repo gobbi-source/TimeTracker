@@ -3,15 +3,15 @@ import './ui/styles/theme.css';
 import './i18n';
 import { AppLayout, NavView } from './ui/layouts/AppLayout';
 import { ClientsView } from './ui/views/ClientsView';
+import { KanbanView } from './ui/views/KanbanView';
 import { useClientStore } from './stores/clientStore';
 import { useProjectStore } from './stores/projectStore';
 import { getServiceContainer } from './services/container';
 import { useTranslation } from 'react-i18next';
-import { KanbanSquare } from 'lucide-react';
 
 export function App() {
   const { t } = useTranslation();
-  const [currentView, setCurrentView] = useState<NavView>('clients');
+  const [currentView, setCurrentView] = useState<NavView>('kanban');
   const [initialized, setInitialized] = useState(false);
 
   const { loadClients } = useClientStore();
@@ -67,24 +67,7 @@ export function App() {
   return (
     <AppLayout currentView={currentView} onNavigate={setCurrentView}>
       {currentView === 'clients' && <ClientsView />}
-
-      {currentView === 'kanban' && (
-        <div style={{ padding: '3rem 2rem', textAlign: 'center', maxWidth: '600px', margin: '0 auto' }}>
-          <div className="glass-panel" style={{ padding: '3rem 2rem' }}>
-            <KanbanSquare size={48} style={{ color: 'var(--accent-blue)', margin: '0 auto 1rem' }} />
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '0.75rem' }}>
-              {t('nav.kanban')}
-            </h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '1.5rem' }}>
-              I clienti e i progetti sono configurati con successo!
-              Nello <strong>Step 4</strong> attiveremo la lavagna Kanban interattiva con colonne personalizzabili e drag & drop dei task.
-            </p>
-            <button className="btn btn-primary" onClick={() => setCurrentView('clients')}>
-              {t('clients.title')}
-            </button>
-          </div>
-        </div>
-      )}
+      {currentView === 'kanban' && <KanbanView />}
 
       {currentView === 'reports' && (
         <div style={{ padding: '3rem 2rem', textAlign: 'center', maxWidth: '600px', margin: '0 auto' }}>
