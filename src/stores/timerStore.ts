@@ -10,11 +10,12 @@ interface TimerState {
   isCrashModalOpen: boolean;
   isLoading: boolean;
   error: string | null;
-
+  isPause: boolean;
+  pausedTaskId: EntityId | null;
   initTimer: () => Promise<void>;
   startTimer: (taskId: EntityId) => Promise<void>;
   pauseTimer: () => Promise<void>;
-  stopTimer: (note?: string) => Promise<void>;
+  stopTimer: (isPause?: boolean, note?: string) => Promise<void>;
   resolveCrashRecovery: (action: 'keep' | 'resume' | 'discard') => Promise<void>;
   tick: () => void;
 }
@@ -28,7 +29,8 @@ export const useTimerStore = create<TimerState>((set, get) => ({
   isCrashModalOpen: false,
   isLoading: false,
   error: null,
-
+  isPause: false,
+  pausedTaskId: null,
   tick: () => {
     const { activeDetails } = get();
     if (activeDetails && !activeDetails.session.endTime) {
@@ -94,10 +96,41 @@ export const useTimerStore = create<TimerState>((set, get) => ({
   },
 
   pauseTimer: async () => {
-    await get().stopTimer();
+    const { isPause, activeDetails, pausedTaskId } = get();
+
+    if (!isPause) {
+      // Metti in pausa: memorizza l'attività corrente
+      if (!activeDetails) return;
+
+      set({ pausedTaskId: activeDetails.session.taskId });
+
+      await get().stopTimer(true);
+    } else {
+      // Riprendi: crea una nuova sessione per la stessa attività
+      if (!pausedTaskId) return;
+
+      const container = await getServiceContainer();
+      await container.timerService.startTimer(pausedTaskId);
+
+      const details = await container.timerService.getActiveSessionDetails();
+
+      if (timerInterval) clearInterval(timerInterval);
+
+      timerInterval = setInterval(() => {
+        get().tick();
+      }, 1000);
+
+      set({
+        activeDetails: details,
+        elapsedSeconds: 0,
+        isPause: false,
+        isLoading: false,
+        error: null,
+      });
+    }
   },
 
-  stopTimer: async (note?: string) => {
+  stopTimer: async (isPause: boolean = false, note?: string) => {
     set({ isLoading: true, error: null });
     if (timerInterval) {
       clearInterval(timerInterval);
@@ -107,12 +140,20 @@ export const useTimerStore = create<TimerState>((set, get) => ({
     try {
       const container = await getServiceContainer();
       await container.timerService.stopActiveTimer(note);
+      if (!isPause) {
+        set({
+          activeDetails: null,
+          elapsedSeconds: 0,
+          isLoading: false,
+          pausedTaskId: null,
+          isPause: false
 
-      set({
-        activeDetails: null,
-        elapsedSeconds: 0,
-        isLoading: false,
-      });
+        });
+      } else {
+        set({
+          isPause: true
+        })
+      }
     } catch (err: unknown) {
       set({
         error: err instanceof Error ? err.message : 'Errore nell\'arresto del timer',

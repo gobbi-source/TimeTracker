@@ -4,6 +4,7 @@ import { useProjectStore } from '../../stores/projectStore';
 import { useClientStore } from '../../stores/clientStore';
 import { ClientBadge } from '../components/ClientBadge';
 import { ProjectModal } from '../components/ProjectModal';
+import { TimerBar } from '../components/TimerBar';
 import { CreateProjectInput, UpdateProjectInput } from '../../domain/entities/Project';
 import {
   Kanban,
@@ -58,40 +59,47 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
         }}
       >
         <div>
-          {/* App Branding */}
+          {/* App Branding + mini Timer */}
           <div
             style={{
-              padding: '1.5rem',
+              padding: '1rem 1.25rem',
               display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
+              flexDirection: 'column',
+              gap: '0.65rem',
               borderBottom: '1px solid var(--border-subtle)',
             }}
           >
-            <div
-              style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: 'var(--radius-md)',
-                background: 'linear-gradient(135deg, #06b6d4, #3b82f6)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#fff',
-                boxShadow: '0 0 12px rgba(6, 182, 212, 0.4)',
-              }}
-            >
-              <Clock size={20} />
+            {/* Logo row */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div
+                style={{
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: 'var(--radius-md)',
+                  background: 'linear-gradient(135deg, #06b6d4, #3b82f6)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#fff',
+                  boxShadow: '0 0 12px rgba(6, 182, 212, 0.4)',
+                }}
+              >
+                <Clock size={20} />
+              </div>
+              <div>
+                <h2 style={{ fontSize: '1.05rem', fontWeight: 700, letterSpacing: '-0.01em' }}>
+                  {t('app.name')}
+                </h2>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                  {t('app.tagline')}
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 style={{ fontSize: '1.05rem', fontWeight: 700, letterSpacing: '-0.01em' }}>
-                {t('app.name')}
-              </h2>
-              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                {t('app.tagline')}
-              </p>
-            </div>
+
+            {/* Compact TimerBar under the logo */}
+            <TimerBar compact />
           </div>
+
 
           {/* Navigation Items */}
           <nav style={{ padding: '1rem 0.75rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
@@ -227,36 +235,40 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
 
       {/* Main Content Area */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        {/* Top Header */}
+        {/* Top Header — wraps on small windows */}
         <header
           style={{
-            height: '60px',
+            minHeight: '52px',
             background: 'var(--bg-secondary)',
             borderBottom: '1px solid var(--border-subtle)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '0 1.5rem',
+            flexWrap: 'wrap',
+            gap: '0.5rem',
+            padding: '0.5rem 1.5rem',
             flexShrink: 0,
           }}
         >
           {/* Project & Client indicator */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', minWidth: 0, flex: '1 1 auto', overflow: 'hidden' }}>
             {selectedProject ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                <FolderKanban size={18} style={{ color: selectedProject.color || 'var(--accent-blue)' }} />
-                <span style={{ fontSize: '1rem', fontWeight: 600 }}>{selectedProject.name}</span>
+              <>
+                <FolderKanban size={17} style={{ color: selectedProject.color || 'var(--accent-blue)', flexShrink: 0 }} />
+                <span style={{ fontSize: '0.95rem', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {selectedProject.name}
+                </span>
                 {/* Mandatory client visible badge */}
                 <ClientBadge client={selectedProjectClient} />
-              </div>
+              </>
             ) : (
-              <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+              <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
                 {t('projects.noProjectsPrompt')}
               </span>
             )}
           </div>
 
-          <div>
+          <div style={{ flexShrink: 0 }}>
             <button className="btn btn-secondary" onClick={() => setProjectModalOpen(true)}>
               <Plus size={16} />
               {t('projects.addNew')}

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TaskWithTrackedTime } from '../../../services/kanbanService';
-import { Clock, Timer, Edit2, Trash2 } from 'lucide-react';
+import { Clock, Timer, Edit2, Trash2, Play, Square } from 'lucide-react';
+import { useTimerStore } from '../../../stores/timerStore';
 
 interface TaskCardProps {
   task: TaskWithTrackedTime;
@@ -28,7 +29,10 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   onDelete,
 }) => {
   const { t } = useTranslation();
+  const { activeDetails, startTimer, stopTimer } = useTimerStore();
   const [isDragging, setIsDragging] = useState(false);
+
+  const isThisTaskActive = activeDetails?.task.id === task.id;
 
   const handleDragStart = (e: React.DragEvent) => {
     setIsDragging(true);
@@ -111,7 +115,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
         </p>
       )}
 
-      {/* Badges: Tracked Time & Estimate */}
+      {/* Footer: Tracked Time, Estimate, Timer Button */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid rgba(255, 255, 255, 0.05)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
           {/* Total Tracked Time */}
@@ -151,6 +155,36 @@ export const TaskCard: React.FC<TaskCardProps> = ({
             </span>
           )}
         </div>
+
+        {/* Timer start/stop button */}
+        <button
+          className="btn-icon"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (isThisTaskActive) {
+              stopTimer(false);
+            } else {
+              startTimer(task.id);
+            }
+          }}
+          title={isThisTaskActive ? t('kanban.stopTimer') : t('kanban.startTimer')}
+          style={{
+            width: '26px',
+            height: '26px',
+            padding: '0',
+            borderRadius: 'var(--radius-full)',
+            background: isThisTaskActive
+              ? 'rgba(244, 63, 94, 0.2)'
+              : 'rgba(16, 185, 129, 0.15)',
+            color: isThisTaskActive ? '#fda4af' : '#34d399',
+            border: isThisTaskActive
+              ? '1px solid rgba(244, 63, 94, 0.3)'
+              : '1px solid rgba(16, 185, 129, 0.3)',
+            flexShrink: 0,
+          }}
+        >
+          {isThisTaskActive ? <Square size={13} /> : <Play size={13} />}
+        </button>
       </div>
     </div>
   );

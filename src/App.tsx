@@ -4,8 +4,10 @@ import './i18n';
 import { AppLayout, NavView } from './ui/layouts/AppLayout';
 import { ClientsView } from './ui/views/ClientsView';
 import { KanbanView } from './ui/views/KanbanView';
+import { CrashRecoveryModal } from './ui/components/CrashRecoveryModal';
 import { useClientStore } from './stores/clientStore';
 import { useProjectStore } from './stores/projectStore';
+import { useTimerStore } from './stores/timerStore';
 import { getServiceContainer } from './services/container';
 import { useTranslation } from 'react-i18next';
 
@@ -16,12 +18,14 @@ export function App() {
 
   const { loadClients } = useClientStore();
   const { loadProjects } = useProjectStore();
+  const { initTimer, isCrashModalOpen, interruptedDetails, resolveCrashRecovery } = useTimerStore();
 
   useEffect(() => {
     async function init() {
       try {
         await getServiceContainer();
         await Promise.all([loadClients(false), loadProjects(false)]);
+        await initTimer();
       } catch (err) {
         console.error('Failed to initialize database or stores:', err);
       } finally {
@@ -29,7 +33,7 @@ export function App() {
       }
     }
     init();
-  }, [loadClients, loadProjects]);
+  }, [loadClients, loadProjects, initTimer]);
 
   if (!initialized) {
     return (
@@ -65,36 +69,45 @@ export function App() {
   }
 
   return (
-    <AppLayout currentView={currentView} onNavigate={setCurrentView}>
-      {currentView === 'clients' && <ClientsView />}
-      {currentView === 'kanban' && <KanbanView />}
+    <>
+      <AppLayout currentView={currentView} onNavigate={setCurrentView}>
+        {currentView === 'clients' && <ClientsView />}
+        {currentView === 'kanban' && <KanbanView />}
 
-      {currentView === 'reports' && (
-        <div style={{ padding: '3rem 2rem', textAlign: 'center', maxWidth: '600px', margin: '0 auto' }}>
-          <div className="glass-panel" style={{ padding: '3rem 2rem' }}>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '0.75rem' }}>
-              {t('reports.title')}
-            </h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
-              I report per cliente, progetto e giorno verranno implementati nello Step 7.
-            </p>
+        {currentView === 'reports' && (
+          <div style={{ padding: '3rem 2rem', textAlign: 'center', maxWidth: '600px', margin: '0 auto' }}>
+            <div className="glass-panel" style={{ padding: '3rem 2rem' }}>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '0.75rem' }}>
+                {t('reports.title')}
+              </h2>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
+                I report per cliente, progetto e giorno verranno implementati nello Step 7.
+              </p>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {currentView === 'settings' && (
-        <div style={{ padding: '3rem 2rem', textAlign: 'center', maxWidth: '600px', margin: '0 auto' }}>
-          <div className="glass-panel" style={{ padding: '3rem 2rem' }}>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '0.75rem' }}>
-              {t('settings.title')}
-            </h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
-              Il backup JSON, lo snapshot SQLite e il ripristino verranno integrati nello Step 8.
-            </p>
+        {currentView === 'settings' && (
+          <div style={{ padding: '3rem 2rem', textAlign: 'center', maxWidth: '600px', margin: '0 auto' }}>
+            <div className="glass-panel" style={{ padding: '3rem 2rem' }}>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '0.75rem' }}>
+                {t('settings.title')}
+              </h2>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
+                Il backup JSON, lo snapshot SQLite e il ripristino verranno integrati nello Step 8.
+              </p>
+            </div>
           </div>
-        </div>
-      )}
-    </AppLayout>
+        )}
+      </AppLayout>
+
+      {/* Crash Recovery Modal — shown above everything when an interrupted session is detected */}
+      <CrashRecoveryModal
+        isOpen={isCrashModalOpen}
+        interruptedDetails={interruptedDetails}
+        onResolve={resolveCrashRecovery}
+      />
+    </>
   );
 }
 

@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTimerStore } from '../../stores/timerStore';
 import { ClientBadge } from './ClientBadge';
-import { Play, Pause, Square, ExternalLink } from 'lucide-react';
+import { Pause, Square, ExternalLink, Play } from 'lucide-react';
 
 export function formatHms(totalSeconds: number): string {
   const hours = Math.floor(totalSeconds / 3600);
@@ -15,13 +15,47 @@ export function formatHms(totalSeconds: number): string {
 
 interface TimerBarProps {
   onOpenMiniTimer?: () => void;
+  /** Se true, mostra una versione compatta per la sidebar */
+  compact?: boolean;
 }
 
-export const TimerBar: React.FC<TimerBarProps> = ({ onOpenMiniTimer }) => {
+export const TimerBar: React.FC<TimerBarProps> = ({ onOpenMiniTimer, compact = false }) => {
   const { t } = useTranslation();
-  const { activeDetails, elapsedSeconds, pauseTimer, stopTimer } = useTimerStore();
+  const { activeDetails, elapsedSeconds, pauseTimer, stopTimer, isPause } = useTimerStore();
 
+  /* ── IDLE STATE ── */
   if (!activeDetails) {
+    if (compact) {
+      return (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.45rem',
+            padding: '0.35rem 0.6rem',
+            borderRadius: 'var(--radius-full)',
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid var(--border-subtle)',
+            fontSize: '0.75rem',
+            color: 'var(--text-muted)',
+          }}
+        >
+          <span
+            style={{
+              width: '7px',
+              height: '7px',
+              borderRadius: '50%',
+              backgroundColor: '#475569',
+              flexShrink: 0,
+            }}
+          />
+          <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {t('timer.noActiveTask')}
+          </span>
+        </div>
+      );
+    }
+
     return (
       <div
         style={{
@@ -47,6 +81,95 @@ export const TimerBar: React.FC<TimerBarProps> = ({ onOpenMiniTimer }) => {
 
   const { task, project, client } = activeDetails;
 
+  /* ── COMPACT (SIDEBAR) ACTIVE STATE ── */
+  if (compact) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.45rem',
+          padding: '0.35rem 0.55rem',
+          borderRadius: 'var(--radius-full)',
+          background: 'rgba(16, 185, 129, 0.08)',
+          border: '1px solid rgba(16, 185, 129, 0.3)',
+          boxShadow: '0 0 8px rgba(16, 185, 129, 0.1)',
+          animation: 'fadeIn 0.2s ease',
+          minWidth: 0,
+        }}
+      >
+        {/* Pulse dot */}
+        <span
+          style={{
+            width: '7px',
+            height: '7px',
+            borderRadius: '50%',
+            backgroundColor: '#10b981',
+            boxShadow: '0 0 6px #10b981',
+            animation: 'pulse 1.5s infinite',
+            flexShrink: 0,
+          }}
+        />
+        <style>{`
+          @keyframes pulse {
+            0%   { transform: scale(0.95); opacity: 0.8; }
+            50%  { transform: scale(1.2);  opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.8; }
+          }
+        `}</style>
+
+        {/* Task title — truncated */}
+        <span
+          style={{
+            fontSize: '0.775rem',
+            fontWeight: 600,
+            color: 'var(--text-primary)',
+            flex: 1,
+            minWidth: 0,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+          title={`${task.title} — ${project.name}`}
+        >
+          {task.title}
+        </span>
+
+        {/* Counter */}
+        <span
+          style={{
+            fontFamily: 'monospace',
+            fontSize: '0.78rem',
+            fontWeight: 700,
+            color: '#34d399',
+            flexShrink: 0,
+          }}
+        >
+          {formatHms(elapsedSeconds)}
+        </span>
+
+        {/* Pause / Stop buttons */}
+        <button
+          className="btn-icon"
+          onClick={() => pauseTimer()}
+          title={t('timer.pause')}
+          style={{ width: '22px', height: '22px', padding: 0, background: 'rgba(255,255,255,0.07)', flexShrink: 0 }}
+        >
+          {isPause ? <Play size={13} /> : <Pause size={13} />}
+        </button>
+        <button
+          className="btn-icon"
+          onClick={() => stopTimer()}
+          title={t('timer.stop')}
+          style={{ width: '22px', height: '22px', padding: 0, background: 'rgba(244,63,94,0.2)', color: '#fda4af', flexShrink: 0 }}
+        >
+          <Square size={12} />
+        </button>
+      </div>
+    );
+  }
+
+  /* ── FULL (HEADER) ACTIVE STATE ── */
   return (
     <div
       style={{
@@ -73,13 +196,6 @@ export const TimerBar: React.FC<TimerBarProps> = ({ onOpenMiniTimer }) => {
             animation: 'pulse 1.5s infinite',
           }}
         />
-        <style>{`
-          @keyframes pulse {
-            0% { transform: scale(0.95); opacity: 0.8; }
-            50% { transform: scale(1.2); opacity: 1; }
-            100% { transform: scale(0.95); opacity: 0.8; }
-          }
-        `}</style>
 
         {/* Task Title */}
         <span
@@ -141,7 +257,7 @@ export const TimerBar: React.FC<TimerBarProps> = ({ onOpenMiniTimer }) => {
 
         <button
           className="btn-icon"
-          onClick={() => stopTimer()}
+          onClick={() => stopTimer(false)}
           title={t('timer.stop')}
           style={{
             width: '28px',
