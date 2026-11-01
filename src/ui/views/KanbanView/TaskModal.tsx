@@ -134,7 +134,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Dettagli sul task..."
+              placeholder={t('kanban.taskDescriptionPlaceholder')}
             />
           </div>
 

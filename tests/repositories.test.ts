@@ -117,12 +117,12 @@ describe('Step 3: Clients & Projects Repositories and Services', () => {
     expect(project.clientId).toBe(client.id);
     expect(project.name).toBe('Piramide');
 
-    // Default columns should be created
+    // Default columns (tipologie) should be created
     const columns = await columnRepo.getByProjectId(project.id);
     expect(columns.length).toBe(3);
-    expect(columns[0].name).toBe('Da fare');
-    expect(columns[1].name).toBe('In corso');
-    expect(columns[2].name).toBe('Fatto');
+    expect(columns[0].name).toBe('Assistenza');
+    expect(columns[1].name).toBe('Aggiornamento');
+    expect(columns[2].name).toBe('Modifiche');
   });
 
   it('creates internal project without client', async () => {

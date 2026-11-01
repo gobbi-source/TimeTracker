@@ -13,6 +13,7 @@ import { DeviceService } from './deviceService';
 import { ClientService } from './clientService';
 import { ProjectService } from './projectService';
 import { KanbanService } from './kanbanService';
+import { TimerService } from './timerService';
 
 export interface ServiceContainer {
   db: IDatabaseAdapter;
@@ -20,6 +21,7 @@ export interface ServiceContainer {
   clientService: ClientService;
   projectService: ProjectService;
   kanbanService: KanbanService;
+  timerService: TimerService;
   clientRepo: SqliteClientRepository;
   projectRepo: SqliteProjectRepository;
   columnRepo: SqliteKanbanColumnRepository;
@@ -67,6 +69,7 @@ async function initializeContainer(): Promise<ServiceContainer> {
   const clientService = new ClientService(clientRepo, deviceService);
   const projectService = new ProjectService(projectRepo, columnRepo, deviceService);
   const kanbanService = new KanbanService(columnRepo, taskRepo, sessionRepo, deviceService);
+  const timerService = new TimerService(sessionRepo, taskRepo, projectRepo, clientRepo, deviceService);
 
   return {
     db,
@@ -74,6 +77,7 @@ async function initializeContainer(): Promise<ServiceContainer> {
     clientService,
     projectService,
     kanbanService,
+    timerService,
     clientRepo,
     projectRepo,
     columnRepo,

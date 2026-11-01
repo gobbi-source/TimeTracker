@@ -33,7 +33,7 @@ export class ProjectService {
 
   async createProject(
     input: CreateProjectInput,
-    defaultColumnNames = ['Da fare', 'In corso', 'Fatto']
+    defaultColumnNames = ['Assistenza', 'Aggiornamento', 'Modifiche']
   ): Promise<Project> {
     const deviceId = await this.deviceService.getDeviceId();
     const project = await this.projectRepo.create(input, deviceId);

@@ -46,21 +46,21 @@ describe('Step 4: Kanban Board & Tasks', () => {
     const boardBefore = await kanbanService.getBoardData(project.id);
 
     expect(boardBefore.columns.length).toBe(3);
-    const [todoCol, inProgressCol] = boardBefore.columns;
-    expect(todoCol.name).toBe('Da fare');
-    expect(inProgressCol.name).toBe('In corso');
+    const [assistenzaCol, aggiornamentoCol] = boardBefore.columns;
+    expect(assistenzaCol.name).toBe('Assistenza');
+    expect(aggiornamentoCol.name).toBe('Aggiornamento');
 
-    // Create task in Todo column
+    // Create task in Assistenza column
     const task = await kanbanService.createTask({
       projectId: project.id,
-      columnId: todoCol.id,
+      columnId: assistenzaCol.id,
       title: 'Configurare Stripe',
       description: 'Integrazione webhook',
       estimatedMinutes: 60,
     });
 
     expect(task.id).toBeDefined();
-    expect(task.columnId).toBe(todoCol.id);
+    expect(task.columnId).toBe(assistenzaCol.id);
     expect(task.estimatedMinutes).toBe(60);
 
     const boardAfter = await kanbanService.getBoardData(project.id);

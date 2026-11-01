@@ -52,7 +52,7 @@ export const ColumnModal: React.FC<ColumnModalProps> = ({
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
           <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>
-            {initialData ? t('kanban.columnName') : t('kanban.addColumn')}
+            {initialData ? t('kanban.editColumn') : t('kanban.addColumn')}
           </h2>
           <button className="btn-icon" onClick={onClose} aria-label={t('common.close')}>
             <X size={20} />
@@ -74,7 +74,7 @@ export const ColumnModal: React.FC<ColumnModalProps> = ({
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Es. In Revisione, Test, Bloccato..."
+              placeholder={t('kanban.columnPlaceholder')}
               autoFocus
               required
             />
